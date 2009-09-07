@@ -2,35 +2,57 @@ package karel.internal
 
 import scala.collection.mutable.{Map => MutableMap}
 
+abstract class Direction(x:Int,y:Int) {
+  def move(location:(Int,Int)) = (location._1 + x, location._2 + y)
+}
+
+object North extends Direction(0,-1)
+object South extends Direction(0,1)
+object East extends Direction(1,0)
+object West extends Direction(-1,0)
+
+
 sealed abstract class Element
 
 /** A beeper, which Karel can pick up or put down */
 class Beeper extends Element {
   override def toString = "(*)"
+  def occupiable = true
 }
 
 /** A wall, which Karel cannot move through */
 class Wall extends Element {
   override def toString = "|=|"
+  def occupiable = false
+}
+
+object Empty extends Element {
+  override def toString = "   "
+  def occupiable = true
+}
+
+object OutOfBounds extends Element {
+  def occupiable = false
 }
 
 /** Karel, our hero */
-case class Karel(var direction:Symbol) extends Element {
+case class Karel(var direction:Direction) extends Element {
   override def toString = direction match {
-    case 'north => " ^ "
-    case 'south => " v "
-    case 'east => " > "
-    case 'west => " < "
+    case North => " ^ "
+    case South => " v "
+    case East => " > "
+    case West => " < "
   }
+  def occupiable = false
 }
 
 /** Karel and a bepper can occupy the same square */
 case class KarelAndBeeper(karel:Karel,beeper:Beeper) extends Element {
   override def toString = karel.direction match {
-    case 'north => " ^*"
-    case 'south => " v*"
-    case 'east => " >*"
-    case 'west => " <*"
+    case North => " ^*"
+    case South => " v*"
+    case East => " >*"
+    case West => " <*"
   }
 }
 
@@ -46,7 +68,7 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
 
   def +(t:Tuple2[Element,Tuple2[Int,Int]]) = {
     inspect(t._2) match {
-      case None => World(this,state + (t._2 -> t._1))
+      case Empty => World(this,state + (t._2 -> t._1))
       case b:Beeper => t._1 match {
         case k:Karel => World(this,state + (t._2 -> new KarelAndBeeper(k,b)))
         case _ => throw new BadLocation(t._2)
@@ -59,12 +81,14 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
     }
   }
 
-  def -(location:(Int,Int)):(World,Option[Element]) = {
+  def inBounds(location:(Int,Int)) = location._1 >= 0 && location._1 < width && location._2 >= 0 && location._2 < height
+
+  def -(location:(Int,Int)):(World,Element) = {
     inspect(location) match {
-      case None => (this,None)
-      case Some(b:Beeper) => (World(this,state - location),Some(b))
-      case Some(k:Karel) => (World(this,state - location),Some(k))
-      case Some(KarelAndBeeper(k,b)) => (World(this,state - location) + (k,location),Some(b))
+      case Empty => (this,Empty)
+      case b:Beeper => (World(this,state - location),b)
+      case k:Karel => (World(this,state - location),k)
+      case KarelAndBeeper(k,b) => (World(this,state - location) + (k,location),b)
       case _ => throw new BadLocation(location)
     }
   }
@@ -75,32 +99,6 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
       case None => this
     }
   }
-
-  def removeKarel(location:(Int,Int)) = World(this,inspect(location) match {
-    case Some(k:Karel) => state - location
-    case Some(kb:KarelAndBeeper) => (state - location) + (location -> kb.beeper)
-    case _ => state
-  })
-
-  def addKarel(location:(Int,Int), k:Karel) = World(this,inspect(location) match {
-    case None => state + (location -> k)
-    case Some(b:Beeper) => state + (location -> new KarelAndBeeper(k,b))
-    case _ => throw new BadLocation(location)
-  })
-
-  /** Remove a beeper from the world, returning a new world without that beeper */
-  def removeBeeper(location:(Int,Int)) = World(this,inspect(location) match {
-    case Some(b:Beeper) => state - location
-    case Some(kb:KarelAndBeeper) => (state - location) + (location -> kb.karel)
-    case _ => state
-  })
-
-  /** Adds a new beeper to the world, returning the world with that beeper */
-  def addBeeper(b:Beeper, location:(Int,Int)) = World(this,inspect(location) match {
-    case Some(k:Karel) => state + (location -> new KarelAndBeeper(k,b))
-    case None => state + (location -> b)
-    case _ => throw new BadLocation(location)
-  })
 
   /** Finds karel in the world */
   def findKarel(k:Karel) = state.find( (item) => item._2 match {
@@ -113,7 +111,11 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
     }
 
   /** Inspect what is at the given location */
-  def inspect(location:(Int,Int)) = state.get(location)
+  def inspect(location:(Int,Int)) = 
+    if (inBounds(location)) state.get(location).getOrElse(Empty)
+    else OutOfBounds
+  /** Inspect what is at the given location */
+  def apply(x:Int,y:Int) = inspect((x,y))
 
   override def toString() = {
     val buf = new StringBuilder
@@ -123,8 +125,7 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
     for ( y <- new Range(0,height,1); x <- new Range(0,width,1)) {
       if (x == 0) if (y < 10) buf.append(" " + y + "|") else buf.append(y + "|")
       inspect((x,y)) match {
-        case Some(x:Element) => buf.append(x.toString)
-        case _ => buf.append("   ")
+        case x:Element => buf.append(x.toString)
       }
       if (x == (width - 1)) buf.append("|\n")
     }

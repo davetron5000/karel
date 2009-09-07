@@ -1,6 +1,30 @@
 import karel.internal._
 
 object Main extends Application {
+  def assert(exp: => Boolean, message:String) = if (!exp) throw new RuntimeException(message)
+
+  def assertEmpty(w:World,x:Int,y:Int) = w(x,y) match {
+    case Empty => ;
+    case x:Element => throw new RuntimeException("Expected Empty, but was a " + x.getClass);
+  }
+  def assertOutOfBounds(w:World,x:Int,y:Int) = w(x,y) match {
+    case OutOfBounds => ;
+    case x:Element => throw new RuntimeException("Expected OutOfBounds, but was a " + x.getClass);
+  }
+  def assertWall(w:World,x:Int,y:Int) = w(x,y) match {
+    case w:Wall => ;
+    case x:Element => throw new RuntimeException("Expected Wall, but was a " + x.getClass);
+  }
+  def assertBeeper(w:World,x:Int,y:Int) = w(x,y) match {
+    case w:Beeper => ;
+    case x:Element => throw new RuntimeException("Expected Beeper, but was a " + x.getClass);
+  }
+  def assertKarel(w:World,x:Int,y:Int) = w(x,y) match {
+    case w:Karel => ;
+    case x:Element => throw new RuntimeException("Expected Karel, but was a " + x.getClass);
+  }
+
+
   var world = new World(10,10,Map(
     (4,5) -> new Wall,
     (4,6) -> new Wall,
@@ -9,25 +33,18 @@ object Main extends Application {
     (3,8) -> new Beeper
   ))
 
-  val k = new Karel('south)
-  world = world + (k,(4,9))
-  println(world.toString)
-  k.direction = 'east
-  println(world.toString)
-  world = world - k + (k,(5,9))
-  println(world.toString)
-
-  /*
-  world = world.addBeeper(new Beeper,(2,2))
-  println(world.toString)
-  println(world.findKarel(k))
-  k.direction = 'west
-
-  world = world.addBeeper(new Beeper,(2,4))
-  println(world.toString)
-
-  world = world.removeBeeper((2,2))
-  println(world.toString)
-  */
-
+  assertWall(world,4,5)
+  assertBeeper(world,3,8)
+  val k = new Karel(North)
+  world = world + ((k,(1,2)))
+  assertKarel(world,1,2)
+  assert(world.findKarel(k) == Some(1,2),"No karel a1 1,2, was at " + world.findKarel(k))
+  assertEmpty(world,1,3)
+  assertEmpty(world,0,0)
+  assertEmpty(world,9,9)
+  assertOutOfBounds(world,-1,9)
+  assertOutOfBounds(world,-1,-1)
+  assertOutOfBounds(world,10,1)
+  assertOutOfBounds(world,1,10)
+  println(world)
 }
