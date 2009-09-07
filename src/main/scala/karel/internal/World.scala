@@ -15,7 +15,7 @@ class Wall extends Element {
 }
 
 /** Karel, our hero */
-case class Karel(direction:Symbol) extends Element {
+case class Karel(var direction:Symbol) extends Element {
   override def toString = direction match {
     case 'north => " ^ "
     case 'south => " v "
@@ -42,6 +42,38 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
 
   object World {
     def apply(w:World,newState:Map[(Int,Int),Element]) = new World(w.width,w.height,newState)
+  }
+
+  def +(t:Tuple2[Element,Tuple2[Int,Int]]) = {
+    inspect(t._2) match {
+      case None => World(this,state + (t._2 -> t._1))
+      case b:Beeper => t._1 match {
+        case k:Karel => World(this,state + (t._2 -> new KarelAndBeeper(k,b)))
+        case _ => throw new BadLocation(t._2)
+      }
+      case k:Karel => t._1 match {
+        case b:Beeper => World(this,state + (t._2 -> new KarelAndBeeper(k,b)))
+        case _ => throw new BadLocation(t._2)
+      }
+      case _ => throw new BadLocation(t._2)
+    }
+  }
+
+  def -(location:(Int,Int)):(World,Option[Element]) = {
+    inspect(location) match {
+      case None => (this,None)
+      case Some(b:Beeper) => (World(this,state - location),Some(b))
+      case Some(k:Karel) => (World(this,state - location),Some(k))
+      case Some(KarelAndBeeper(k,b)) => (World(this,state - location) + (k,location),Some(b))
+      case _ => throw new BadLocation(location)
+    }
+  }
+
+  def -(k:Karel):World = {
+    findKarel(k) match {
+      case Some(location) => this.-(location)._1
+      case None => this
+    }
   }
 
   def removeKarel(location:(Int,Int)) = World(this,inspect(location) match {

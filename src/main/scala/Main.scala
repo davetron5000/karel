@@ -10,9 +10,12 @@ object Main extends Application {
   ))
 
   val k = new Karel('south)
-  world = world.addKarel((3,8),k)
+  world = world + (k,(4,9))
   println(world.toString)
-  println(world.findKarel(k))
+  k.direction = 'east
+  println(world.toString)
+  world = world - k + (k,(5,9))
+  println(world.toString)
 
   /*
   world = world.addBeeper(new Beeper,(2,2))
