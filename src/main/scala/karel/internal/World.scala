@@ -1,63 +1,12 @@
 package karel.internal
 
-import scala.collection.mutable.{Map => MutableMap}
-
-abstract class Direction(x:Int,y:Int) {
-  def move(location:(Int,Int)) = (location._1 + x, location._2 + y)
+/** Internal code made a mistake */
+class BadLocation(val location:(Int,Int)) extends RuntimeException {
+  override def getMessage = location.toString
 }
 
-object North extends Direction(0,-1)
-object South extends Direction(0,1)
-object East extends Direction(1,0)
-object West extends Direction(-1,0)
-
-
-sealed abstract class Element
-
-/** A beeper, which Karel can pick up or put down */
-class Beeper extends Element {
-  override def toString = "(*)"
-  def occupiable = true
-}
-
-/** A wall, which Karel cannot move through */
-class Wall extends Element {
-  override def toString = "|=|"
-  def occupiable = false
-}
-
-object Empty extends Element {
-  override def toString = "   "
-  def occupiable = true
-}
-
-object OutOfBounds extends Element {
-  def occupiable = false
-}
-
-/** Karel, our hero */
-case class Karel(var direction:Direction) extends Element {
-  override def toString = direction match {
-    case North => " ^ "
-    case South => " v "
-    case East => " > "
-    case West => " < "
-  }
-  def occupiable = false
-}
-
-/** Karel and a bepper can occupy the same square */
-case class KarelAndBeeper(karel:Karel,beeper:Beeper) extends Element {
-  override def toString = karel.direction match {
-    case North => " ^*"
-    case South => " v*"
-    case East => " >*"
-    case West => " <*"
-  }
-}
-
-
-class BadLocation(val location:(Int,Int)) extends RuntimeException
+/** Karel did something he should've have */
+class Explosion extends RuntimeException
 
 /** The current state of the world.  Immutable */
 class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
@@ -66,6 +15,7 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
     def apply(w:World,newState:Map[(Int,Int),Element]) = new World(w.width,w.height,newState)
   }
 
+  /** Add the given element at the given coordinates */
   def +(t:Tuple2[Element,Tuple2[Int,Int]]) = {
     inspect(t._2) match {
       case Empty => World(this,state + (t._2 -> t._1))
@@ -81,8 +31,7 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
     }
   }
 
-  def inBounds(location:(Int,Int)) = location._1 >= 0 && location._1 < width && location._2 >= 0 && location._2 < height
-
+  /** Remove whatever is at this location, if it can be so removed.  */
   def -(location:(Int,Int)):(World,Element) = {
     inspect(location) match {
       case Empty => (this,Empty)
@@ -93,6 +42,7 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
     }
   }
 
+  /** Remove karel from whever he is */
   def -(k:Karel):World = {
     findKarel(k) match {
       case Some(location) => this.-(location)._1
@@ -114,9 +64,11 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
   def inspect(location:(Int,Int)) = 
     if (inBounds(location)) state.get(location).getOrElse(Empty)
     else OutOfBounds
+
   /** Inspect what is at the given location */
   def apply(x:Int,y:Int) = inspect((x,y))
 
+  /** Prints a text view of the world */
   override def toString() = {
     val buf = new StringBuilder
     buf.append("  _")
@@ -134,4 +86,8 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
     buf.append("_\n")
     buf.toString
   }
+
+  private def inBounds(location:(Int,Int)) = 
+    location._1 >= 0 && location._1 < width && location._2 >= 0 && location._2 < height
+
 }

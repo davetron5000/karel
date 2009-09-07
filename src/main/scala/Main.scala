@@ -1,4 +1,5 @@
 import karel.internal._
+import karel._
 
 object Main extends Application {
   def assert(exp: => Boolean, message:String) = if (!exp) throw new RuntimeException(message)
@@ -30,7 +31,8 @@ object Main extends Application {
     (4,6) -> new Wall,
     (4,7) -> new Wall,
     (4,8) -> new Wall,
-    (3,8) -> new Beeper
+    (3,8) -> new Beeper,
+    (0,0) -> new Beeper
   ))
 
   assertWall(world,4,5)
@@ -40,11 +42,31 @@ object Main extends Application {
   assertKarel(world,1,2)
   assert(world.findKarel(k) == Some(1,2),"No karel a1 1,2, was at " + world.findKarel(k))
   assertEmpty(world,1,3)
-  assertEmpty(world,0,0)
+  assertEmpty(world,0,1)
   assertEmpty(world,9,9)
   assertOutOfBounds(world,-1,9)
   assertOutOfBounds(world,-1,-1)
   assertOutOfBounds(world,10,1)
   assertOutOfBounds(world,1,10)
+
+  println(world)
+  world = new Move(world)(k)
+  println(world)
+  world = new TurnLeft(world)(k)
+  println(world)
+  world = new Move(world)(k)
+  println(world)
+  world = new TurnLeft(world)(k)
+  world = new TurnLeft(world)(k)
+  world = new TurnLeft(world)(k)
+  world = new Move(world)(k)
+  world = new PickBeeper(world)(k)
+  println(world)
+  world = new TurnLeft(world)(k)
+  world = new TurnLeft(world)(k)
+  world = new TurnLeft(world)(k)
+  world = new Move(world)(k)
+  println(world)
+  world = new PutBeeper(world)(k)
   println(world)
 }
