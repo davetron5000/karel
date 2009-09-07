@@ -95,4 +95,26 @@ object TestMain extends Application {
   assert(!RIGHT_IS_BLOCKED(clearWorld,karel),"RIGHT is not blocked")
   assert(!BACK_IS_CLEAR(clearWorld,karel),"BACK is not clear")
   assert(BACK_IS_BLOCKED(clearWorld,karel),"BACK is not blocked")
+
+  assert(NOT_NEXT_TO_BEEPER(clearWorld,karel),"Expected not next to beeper\n" + clearWorld)
+  clearWorld = clearWorld + ((new Beeper,(1,1)))
+  assert(NEXT_TO_BEEPER(clearWorld,karel),"Expected next to beeper\n" + clearWorld)
+  assert(NO_BEEPERS_IN_BAG(clearWorld,karel),"Expected not to have beepers")
+  clearWorld = PICK_BEEPER(clearWorld,karel)
+  assert(ANY_BEEPERS_IN_BAG(clearWorld,karel),"Expected to have beepers")
+  assert(ANY_BEEPERS_IN_BAG(clearWorld,karel),"Expected to have beepers")
+
+  assert(FACING_WEST(clearWorld,karel),"Expected to face west : " + karel.direction)
+  assert(NOT_FACING_EAST(clearWorld,karel),"Expected to not face east : " + karel.direction)
+  assert(NOT_FACING_NORTH(clearWorld,karel),"Expected to not face north : " + karel.direction)
+  assert(NOT_FACING_SOUTH(clearWorld,karel),"Expected to not face south : " + karel.direction)
+
+  clearWorld = TURN_LEFT(clearWorld,karel)
+
+
+  assert(FACING_SOUTH(clearWorld,karel),"Expected to face west : " + karel.direction)
+  assert(NOT_FACING_EAST(clearWorld,karel),"Expected to not face east : " + karel.direction)
+  assert(NOT_FACING_NORTH(clearWorld,karel),"Expected to not face north : " + karel.direction)
+  assert(NOT_FACING_WEST(clearWorld,karel),"Expected to not face south : " + karel.direction)
+
 }
