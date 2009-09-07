@@ -35,31 +35,36 @@ case class KarelAndBeeper(karel:Karel,beeper:Beeper) extends Element {
 }
 
 
-class BadLocation(val location:Tuple2[Int,Int]) extends RuntimeException
-
-object World {
-  def apply(w:World,newState:Map[Tuple2[Int,Int],Element]) = new World(w.width,w.height,newState)
-}
+class BadLocation(val location:(Int,Int)) extends RuntimeException
 
 /** The current state of the world.  Immutable */
-class World(val width: Int, val height: Int, state: Map[Tuple2[Int,Int],Element]) {
+class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
 
-  /** Insert Karel into the world; this returns a new World */
-  def insertKarel(location:Tuple2[Int,Int], k:Karel) = World(this,inspect(location) match {
+  object World {
+    def apply(w:World,newState:Map[(Int,Int),Element]) = new World(w.width,w.height,newState)
+  }
+
+  def removeKarel(location:(Int,Int)) = World(this,inspect(location) match {
+    case Some(k:Karel) => state - location
+    case Some(kb:KarelAndBeeper) => (state - location) + (location -> kb.beeper)
+    case _ => state
+  })
+
+  def addKarel(location:(Int,Int), k:Karel) = World(this,inspect(location) match {
     case None => state + (location -> k)
     case Some(b:Beeper) => state + (location -> new KarelAndBeeper(k,b))
     case _ => throw new BadLocation(location)
   })
 
   /** Remove a beeper from the world, returning a new world without that beeper */
-  def removeBeeper(location:Tuple2[Int,Int]) = World(this,inspect(location) match {
+  def removeBeeper(location:(Int,Int)) = World(this,inspect(location) match {
     case Some(b:Beeper) => state - location
     case Some(kb:KarelAndBeeper) => (state - location) + (location -> kb.karel)
     case _ => state
   })
 
   /** Adds a new beeper to the world, returning the world with that beeper */
-  def addBeeper(b:Beeper, location:Tuple2[Int,Int]) = World(this,inspect(location) match {
+  def addBeeper(b:Beeper, location:(Int,Int)) = World(this,inspect(location) match {
     case Some(k:Karel) => state + (location -> new KarelAndBeeper(k,b))
     case None => state + (location -> b)
     case _ => throw new BadLocation(location)
@@ -76,7 +81,7 @@ class World(val width: Int, val height: Int, state: Map[Tuple2[Int,Int],Element]
     }
 
   /** Inspect what is at the given location */
-  def inspect(location:Tuple2[Int,Int]) = state.get(location)
+  def inspect(location:(Int,Int)) = state.get(location)
 
   override def toString() = {
     val buf = new StringBuilder

@@ -10,7 +10,7 @@ object Main extends Application {
   ))
 
   val k = new Karel('south)
-  world = world.insertKarel((3,8),k)
+  world = world.addKarel((3,8),k)
   println(world.toString)
   println(world.findKarel(k))
 

@@ -2,9 +2,11 @@ package karel;
 
 import karel.internal._;
 
-abstract class Instruction 
+abstract class Instruction {
+}
 /** Move one step in the direction Karel is facing */
-case class Move(w:World) extends Instruction
+case class Move(w:World) extends Instruction {
+}
 /** Rotate to the left, in place */
 case class TurnLeft(w:World) extends Instruction
 /** Pick up a beeper at the current location */
