@@ -9,12 +9,30 @@ abstract class Direction(x:Int,y:Int) {
   def move(location:(Int,Int)) = (location._1 + x, location._2 + y)
   /** If we turn left, what direction are we facing? */
   def left:Direction
+  def right:Direction
+  def behind:Direction
 }
 
-object North extends Direction(0,-1) { def left = West }
-object South extends Direction(0,1) { def left = East }
-object East extends Direction(1,0) { def left = North }
-object West extends Direction(-1,0) { def left = South }
+object North extends Direction(0,-1) {
+  def left = West 
+  def right = East
+  def behind = South
+}
+object South extends Direction(0,1) {
+  def left = East 
+  def right = West
+  def behind = North
+}
+object East extends Direction(1,0) {
+  def left = North 
+  def right = South
+  def behind = West
+}
+object West extends Direction(-1,0) {
+  def left = South 
+  def right = North
+  def behind = East
+}
 
 
 /** Base of things that can be in the world on a square */

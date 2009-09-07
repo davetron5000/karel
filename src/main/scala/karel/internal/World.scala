@@ -45,7 +45,13 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
   /** Remove karel from whever he is */
   def -(k:Karel):World = {
     findKarel(k) match {
-      case Some(location) => this.-(location)._1
+      case Some(location) => {
+        val (world,element) = this.-(location)
+        element match {
+          case b:Beeper => (world - k) + (b,location)
+          case _ => world
+        }
+      }
       case None => this
     }
   }

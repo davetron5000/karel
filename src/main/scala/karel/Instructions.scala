@@ -2,12 +2,10 @@ package karel;
 
 import karel.internal._;
 
-abstract class Instruction {
-  def apply(k:Karel):World
-}
-/** Move one step in the direction Karel is facing */
-case class Move(w:World) extends Instruction {
-  def apply(k:Karel) = {
+abstract class Instruction extends Function2[World,Karel,World]
+
+object MOVE extends Instruction {
+  def apply(w:World,k:Karel) = {
     w.findKarel(k) match {
       case Some(location) => {
         val newLocation = k.direction.move(location)
@@ -20,17 +18,15 @@ case class Move(w:World) extends Instruction {
     }
   }
 }
-
-/** Rotate to the left, in place */
-case class TurnLeft(w:World) extends Instruction {
-  def apply(k:Karel) = { 
+object TURN_LEFT extends Instruction {
+  def apply(w:World,k:Karel) = { 
     k.direction = k.direction.left 
     w 
   }
 }
-/** Pick up a beeper at the current location */
-case class PickBeeper(w:World) extends Instruction {
-  def apply(k:Karel) = w.findKarel(k) match {
+
+object PICK_BEEPER extends Instruction {
+  def apply(w:World,k:Karel) = w.findKarel(k) match {
     case Some(location) => w.inspect(location) match {
         case KarelAndBeeper(_,b) => {
           k += b 
@@ -42,9 +38,8 @@ case class PickBeeper(w:World) extends Instruction {
     case _ => throw new IllegalStateException("No karel on board")
   }
 }
-/** Put down a bepper at the current location */
-case class PutBeeper(w:World) extends Instruction {
-  def apply(k:Karel) = w.findKarel(k) match {
+object PUT_BEEPER extends Instruction {
+  def apply(w:World,k:Karel) = w.findKarel(k) match {
     case Some(location) => k.beeper match {
       case Some(b) => w + (b,location)
       case None => throw new Explosion
@@ -52,5 +47,3 @@ case class PutBeeper(w:World) extends Instruction {
     case _ => throw new IllegalStateException("No karel on board")
   }
 }
-
-
