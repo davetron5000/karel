@@ -2,7 +2,9 @@ package karel
 
 import karel.internal._;
 
-abstract class Condition extends Function2[World,Karel,Boolean] {
+abstract class KarelStatement[R] extends Function2[World,Karel,R] 
+
+abstract class Condition extends KarelStatement[Boolean] {
 
   implicit def optionToLocation(o:Option[(Int,Int)]) = o.getOrElse(null)
 
