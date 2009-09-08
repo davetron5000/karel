@@ -1,1 +1,1 @@
-scala -cp target/classes Main
+scala -cp target/classes $*

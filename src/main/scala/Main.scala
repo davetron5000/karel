@@ -1,7 +1,7 @@
 import karel._
 
 object Main extends Application with KarelTheRobot {
-  run(10,10, Map(
+  BEGIN_PROGRAM(10,10, Map(
       (4,5) -> new Wall,
       (4,6) -> new Wall,
       (4,7) -> new Wall,
@@ -15,7 +15,7 @@ object Main extends Application with KarelTheRobot {
       (0,0) -> new Beeper
     ), 
     {
-      DEF('TURN_RIGHT,BLOCK(TURN_LEFT,TURN_LEFT,TURN_LEFT))
+      DEF('TURN_RIGHT,BLOCK(ITERATE(3,TURN_LEFT)))
       DEF('TURN_AROUND,BLOCK(TURN_LEFT,TURN_LEFT))
       DEF('THROW_BEEPER,BLOCK(
         IF(NEXT_TO_BEEPER,BLOCK(
@@ -33,7 +33,7 @@ object Main extends Application with KarelTheRobot {
         CALL('TURN_AROUND)
       ))
     },
-    BLOCK(
+    BEGIN_EXECUTION(
       WHILE_DO(NOT_FACING_EAST,TURN_LEFT),
       CALL('THROW_BEEPER),
       CALL('TURN_RIGHT),

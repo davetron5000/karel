@@ -35,6 +35,9 @@ trait Controls extends Instructions with Conditions {
     }
   }
 
+  /** Syntactic Sugar */
+  case class BEGIN_EXECUTION(program:Instruction*) extends BLOCK(program.toArray: _*)
+
   /** A no-op */
   object NOOP extends Instruction {
     def apply(w:World,k:Karel) = w
