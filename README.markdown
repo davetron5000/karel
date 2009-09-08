@@ -35,7 +35,7 @@ Karel's programming language doesn't define a way to create the world in which K
           {
             DEF('TURN_RIGHT,BLOCK(ITERATE(3,TURN_LEFT)))
             DEF('TURN_AROUND,BLOCK(TURN_LEFT,TURN_LEFT))
-            DEF ('RUN,BLOCK(
+            DEF('RUN,BLOCK(
               WHILE_DO(FRONT_IS_CLEAR,MOVE),
               CALL('TURN_AROUND)
             ))
@@ -122,6 +122,8 @@ Given this, we can see that the definition of the conditions is *very* repetitiv
     end
 
 (This could probably be tightened up a bit)
+
+Also, the Scala means of calling defined subroutines that I came up with (`CALL('SUB_NAME))`) is kinda lame; the subs don't look like real calls (as they would in proper Karel).  Ruby, via the ever-useful `method_missing`, would've made this dead simple.
 
 I plan to work up a Ruby version of Karel as a comparison, but my suspicion is that Ruby would afford a much cleaner DSL in the end.
 
