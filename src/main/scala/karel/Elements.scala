@@ -1,4 +1,4 @@
-package karel.internal
+package karel
 
 /** A direction that Karel may face.
 * @param x the delta x when moving this direction

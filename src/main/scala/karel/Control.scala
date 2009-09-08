@@ -1,9 +1,7 @@
 package karel
 
-import karel.internal._;
-
 /** Control Structures */
-object Control {
+trait Controls extends Instructions with Conditions {
   var subs:Map[Symbol,BLOCK] = Map()
 
   implicit def instructionToBlock(i:Instruction) = BLOCK(i)

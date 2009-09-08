@@ -1,4 +1,4 @@
-package karel.internal
+package karel
 
 /** Internal code made a mistake */
 class BadLocation(val location:(Int,Int)) extends RuntimeException {
@@ -14,6 +14,8 @@ class World(val width: Int, val height: Int, state: Map[(Int,Int),Element]) {
   object World {
     def apply(w:World,newState:Map[(Int,Int),Element]) = new World(w.width,w.height,newState)
   }
+
+  def +(e:Element,x:Int,y:Int):World = this.+( (e,(x,y)) )
 
   /** Add the given element at the given coordinates */
   def +(t:Tuple2[Element,Tuple2[Int,Int]]) = {

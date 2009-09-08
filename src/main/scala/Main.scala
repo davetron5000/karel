@@ -1,7 +1,6 @@
-import karel.internal._
 import karel._
 
-object Main extends Application {
+object Main extends Application with KarelTheRobot {
   var world = new World(10,10,Map(
     (4,5) -> new Wall,
     (4,6) -> new Wall,
@@ -19,8 +18,6 @@ object Main extends Application {
 
   val k = new Karel(North)
   world = world + ((k,(1,2)))
-
-  import Control._
 
   DEF('TURN_RIGHT,BLOCK(TURN_LEFT,TURN_LEFT,TURN_LEFT))
   DEF('TURN_AROUND,BLOCK(TURN_LEFT,TURN_LEFT))

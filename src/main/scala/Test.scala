@@ -1,7 +1,7 @@
-import karel.internal._
 import karel._
 
-object TestMain extends Application {
+object TestMain extends Application with KarelTheRobot {
+
   def assert(exp: => Boolean, message:String) = if (!exp) throw new RuntimeException(message)
 
   def assertEmpty(w:World,x:Int,y:Int) = w(x,y) match {
